@@ -5,13 +5,22 @@ import android.text.TextUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.parceler.Parcel;
 
 import java.util.ArrayList;
 
+@Parcel
 public class Book {
     private String openLibraryId;
     private String author;
     private String title;
+    private String publish_year;
+
+    public Book(){}
+
+    public String getPublish_year() {
+        return publish_year.replace("[", "").replace("]", "").replace("\"", "");
+    }
 
     public String getOpenLibraryId() {
         return openLibraryId;
@@ -42,6 +51,7 @@ public class Book {
                 final JSONArray ids = jsonObject.getJSONArray("edition_key");
                 book.openLibraryId = ids.getString(0);
             }
+            book.publish_year = getPublish_year(jsonObject);
             book.title = jsonObject.has("title_suggest") ? jsonObject.getString("title_suggest") : "";
             book.author = getAuthor(jsonObject);
         } catch (JSONException e) {
@@ -86,5 +96,19 @@ public class Book {
             }
         }
         return books;
+    }
+
+    private static String getPublish_year(final JSONObject jsonObject) {
+        try {
+            final JSONArray listDate = jsonObject.getJSONArray("publish_date");
+            int numDate = listDate.length();
+            final String[] dateStrings = new String[numDate];
+            for (int i = 0; i < numDate; ++i) {
+                dateStrings[i] = listDate.getString(i);
+            }
+            return dateStrings[numDate-1];
+        } catch (JSONException e) {
+            return "";
+        }
     }
 }
